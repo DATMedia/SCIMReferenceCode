@@ -19,6 +19,7 @@ namespace Microsoft.SCIM.WebHostSample
 	using Microsoft.IdentityModel.Tokens;
     using Microsoft.SCIM.WebHostSample.Provider;
     using Newtonsoft.Json;
+	using PipelineLogger;
 
     public class Startup
     {
@@ -94,7 +95,14 @@ namespace Microsoft.SCIM.WebHostSample
 
             services.AddSingleton(typeof(IProvider), this.ProviderBehavior);
             services.AddSingleton(typeof(IMonitor), this.MonitoringBehavior);
-        }
+            services.AddPipelineLogging(
+                pipeLineLoggingOptions =>
+                {
+                    pipeLineLoggingOptions.ServerName("SCIM");
+                }
+            );
+
+		}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
@@ -107,10 +115,13 @@ namespace Microsoft.SCIM.WebHostSample
             app.UseHsts();
             app.UseRouting();
             app.UseHttpsRedirection();
+            app.InsertPipelineLogger(l => l.MiddlewareBefore("HttpsRedirection").MiddlewareAfter("Authentication"));
             app.UseAuthentication();
-            app.UseAuthorization();
+			app.InsertPipelineLogger(l => l.MiddlewareBefore("UseAuthentication").MiddlewareAfter("UseAuthorization"));
+			app.UseAuthorization();
+			app.InsertPipelineLogger(l => l.MiddlewareBefore("UseAuthorization").MiddlewareAfter("UseEndpoints"));
 
-            app.UseEndpoints(
+			app.UseEndpoints(
                 (IEndpointRouteBuilder endpoints) =>
                 {
                     endpoints.MapDefaultControllerRoute();
