@@ -15,7 +15,8 @@ namespace Microsoft.SCIM.WebHostSample
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.IdentityModel.Tokens;
+	using Microsoft.IdentityModel.Logging;
+	using Microsoft.IdentityModel.Tokens;
     using Microsoft.SCIM.WebHostSample.Provider;
     using Newtonsoft.Json;
 
@@ -40,7 +41,12 @@ namespace Microsoft.SCIM.WebHostSample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            void ConfigureMvcNewtonsoftJsonOptions(MvcNewtonsoftJsonOptions options) => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            // Because we are testing
+            IdentityModelEventSource.ShowPII = true;
+
+
+
+			void ConfigureMvcNewtonsoftJsonOptions(MvcNewtonsoftJsonOptions options) => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 
             void ConfigureAuthenticationOptions(AuthenticationOptions options)
             {
@@ -50,7 +56,9 @@ namespace Microsoft.SCIM.WebHostSample
 
             void ConfigureJwtBearerOptons( JwtBearerOptions options)
             {
-                if (this.environment.IsDevelopment())
+                // THE JWT VALIDATION DOESN'T WORK
+                // Making this work is a different problem
+                if (true || this.environment.IsDevelopment())
                 {
                     options.TokenValidationParameters =
                        new TokenValidationParameters
@@ -77,6 +85,7 @@ namespace Microsoft.SCIM.WebHostSample
                         OnAuthenticationFailed = AuthenticationFailed
                     };
                 }
+                options.IncludeErrorDetails = true;
 
             }
 

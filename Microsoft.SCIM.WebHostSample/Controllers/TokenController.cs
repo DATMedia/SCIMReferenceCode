@@ -25,12 +25,22 @@ namespace Microsoft.SCIM.WebHostSample.Controllers
             this.configuration = Configuration;
         }
 
+
+		// https://stackoverflow.com/questions/49875167/jwt-error-idx10634-unable-to-create-the-signatureprovider-c-sharp
+        // The key must have at least 32 characters
+		private string SecurityAlgorithm => SecurityAlgorithms.HmacSha256;
+
         private string GenerateJSONWebToken()
         {
             SymmetricSecurityKey securityKey =
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.configuration["Token:IssuerSigningKey"]));
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(this.configuration["Token:IssuerSigningKey"])
+            );
             SigningCredentials credentials =
-                new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                new SigningCredentials(
+                    securityKey,
+                    this.SecurityAlgorithm
+            );
 
             DateTime startTime = DateTime.UtcNow;
             DateTime expiryTime;
