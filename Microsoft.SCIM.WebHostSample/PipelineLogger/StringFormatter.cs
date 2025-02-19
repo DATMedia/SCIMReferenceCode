@@ -159,6 +159,12 @@ namespace PipelineLogger
                 string bodyAsString = encoding.GetString(body);
                 return Format(bodyAsString);
             }
+            else if (contentType.Equals("application/scim+json; charset=utf-8", StringComparison.InvariantCultureIgnoreCase))
+            {
+				var encoding = new System.Text.UTF8Encoding();
+				string bodyAsString = encoding.GetString(body);
+				return Format(bodyAsString);
+			}
             else if ((contentType == "text/html; charset=UTF-8") && (body.Length < 2000))
             {
                 var encoding = new System.Text.UTF8Encoding();
