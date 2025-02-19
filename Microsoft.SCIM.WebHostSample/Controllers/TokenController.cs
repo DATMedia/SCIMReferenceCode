@@ -6,9 +6,7 @@ namespace Microsoft.SCIM.WebHostSample.Controllers
 {
     using System;
     using System.IdentityModel.Tokens.Jwt;
-    using System.Text;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.IdentityModel.Tokens;
 
     // Controller for generating a bearer token for authorization during testing.
