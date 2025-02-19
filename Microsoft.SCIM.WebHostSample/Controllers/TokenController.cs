@@ -15,48 +15,30 @@ namespace Microsoft.SCIM.WebHostSample.Controllers
     // This is not meant to replace proper Oauth for authentication purposes.
     [Route("scim/token")]
     [ApiController]
-    public class TokenController : ControllerBase
+    public class TokenController(SecurityConfigurationProvider securityConfigurationProvider) : ControllerBase
     {
-        private readonly IConfiguration configuration;        
-        private const int defaultTokenExpirationTimeInMins = 120;
-
-        public TokenController(IConfiguration Configuration)
-        {
-            this.configuration = Configuration;
-        }
-
-
-		// https://stackoverflow.com/questions/49875167/jwt-error-idx10634-unable-to-create-the-signatureprovider-c-sharp
-        // The key must have at least 32 characters
-		private string SecurityAlgorithm => SecurityAlgorithms.HmacSha256;
-
         private string GenerateJSONWebToken()
         {
-            SymmetricSecurityKey securityKey =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(this.configuration["Token:IssuerSigningKey"])
-            );
+            var securityConfiguration = securityConfigurationProvider.GetSecurityConfiguration();
+
+
             SigningCredentials credentials =
                 new SigningCredentials(
-                    securityKey,
-                    this.SecurityAlgorithm
+					securityConfiguration.SigningKey,
+					securityConfiguration.SecurityAlgorithm
             );
 
             DateTime startTime = DateTime.UtcNow;
-            DateTime expiryTime;
-            if (double.TryParse(this.configuration["Token:TokenLifetimeInMins"], out double tokenExpiration))
-                expiryTime = startTime.AddMinutes(tokenExpiration);
-            else
-                expiryTime = startTime.AddMinutes(defaultTokenExpirationTimeInMins);
+            DateTime expiryTime = startTime.Add(securityConfiguration.TokenLifetime);
 
-            JwtSecurityToken token =
-                new JwtSecurityToken(
-                    this.configuration["Token:TokenIssuer"],
-                    this.configuration["Token:TokenAudience"],
-                    null,
-                    notBefore: startTime,
-                    expires: expiryTime,
-                    signingCredentials: credentials);
+            JwtSecurityToken token = new (
+		        securityConfiguration.TokenIssuer,
+                securityConfiguration.TokenAudience,
+                null,
+                notBefore: startTime,
+                expires: expiryTime,
+                signingCredentials: credentials
+             );
 
             string result = new JwtSecurityTokenHandler().WriteToken(token);
             return result;
