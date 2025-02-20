@@ -153,6 +153,12 @@ namespace PipelineLogger
                 });
                 return $"=== {contentType} ===\r\n{Format(keyValuePairs)}";
             }
+            else if (contentType == "application/json")
+            {
+				var encoding = new System.Text.UTF8Encoding();
+				string bodyAsString = encoding.GetString(body);
+				return Format(bodyAsString);
+			}
             else if (contentType == "application/json; charset=UTF-8")
             {
                 var encoding = new System.Text.UTF8Encoding();
