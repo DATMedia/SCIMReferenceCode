@@ -1,11 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.SystemForCrossDomainIdentityManagement\Microsoft.SCIM.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PipelineLogger" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
